@@ -8,12 +8,13 @@ export const staticDataAnalysisController = new Elysia({
   name: 'StaticDataAnalysis.Controller'
 })
   .post('/', async ({ body, set }) => {
-    const { title, description, categories, clarificationParagraph } = body;
+    const { title, description, categories, isYoutube, clarificationParagraph } = body;
 
     console.log('📝 [Static Analysis] API call received');
     console.log('📥 [Static Analysis] Input - Title:', title);
     console.log('📥 [Static Analysis] Input - Description:', description);
     console.log('📥 [Static Analysis] Input - Categories:', categories);
+    console.log('📥 [Static Analysis] Input - YouTube mode:', isYoutube || false);
     if (clarificationParagraph) {
       console.log('📥 [Static Analysis] Input - Clarification paragraph:', clarificationParagraph);
     }
@@ -21,7 +22,7 @@ export const staticDataAnalysisController = new Elysia({
     try {
       console.log('✅ [Static Analysis] Starting input validation...');
       // Validate input using service
-      StaticDataAnalysisService.validateInput(title, description, categories);
+      StaticDataAnalysisService.validateInput(title, description, categories, isYoutube);
       console.log('✅ [Static Analysis] Input validation passed');
 
       console.log('🤖 [Static Analysis] Starting Gemini AI analysis...');
@@ -30,17 +31,25 @@ export const staticDataAnalysisController = new Elysia({
         title,
         description,
         categories,
+        isYoutube,
         clarificationParagraph
       );
 
       console.log('✅ [Static Analysis] Gemini analysis completed successfully');
       console.log('📤 [Static Analysis] Response - Categories found:', result.categories.length);
       console.log('📤 [Static Analysis] Response - Categories:', result.categories);
+      if (result.description) {
+        console.log('📤 [Static Analysis] Response - Description length:', result.description.length);
+      }
 
-      const response = {
+      const response: any = {
         success: true,
         categories: result.categories
       };
+      
+      if (result.description) {
+        response.description = result.description;
+      }
 
       console.log('🎉 [Static Analysis] API call completed successfully');
       return response;
@@ -88,12 +97,14 @@ export const staticDataAnalysisController = new Elysia({
         **Features:**
         - AI-powered static data analysis with academic precision
         - Hebrew language support for Jewish philosophy content
+        - YouTube-style description generation (when isYoutube=true) starting with "בסרטון זה פרופ׳ שלום צדיק מדבר על..."
         - Optional clarification paragraph for additional context
         - Conservative category selection - only returns categories with direct relevance
         - Semantic analysis of title and description
         - Validates categories against provided list
         - No external API calls required for content retrieval
         - Returns empty array if no categories are relevant (no forced categorization)
+        - Dual mode: categories-only or categories + YouTube-style description
       `,
       tags: ['Static Data Analysis'],
       responses: {
@@ -101,9 +112,22 @@ export const staticDataAnalysisController = new Elysia({
           description: 'Successfully analyzed static data and identified matching categories',
           content: {
             'application/json': {
-              example: {
-                success: true,
-                categories: ["רמב״ם", "פילוסופיה אריסטוטלית"]
+              examples: {
+                'categories-only': {
+                  summary: 'Categories only (isYoutube: false)',
+                  value: {
+                    success: true,
+                    categories: ["רמב״ם", "פילוסופיה אריסטוטלית"]
+                  }
+                },
+                'youtube-style': {
+                  summary: 'YouTube style with description (isYoutube: true)', 
+                  value: {
+                    success: true,
+                    categories: ["רמב״ם", "פילוסופיה אריסטוטלית"],
+                    description: "בסרטון זה פרופ׳ שלום צדיק מדבר על השפעת הפילוסופיה האריסטוטלית על המחשבה היהודית. הוא מרחיב על הרמב״ם ועל הדרך שבה השלב בין החכמה היוונית לבין המסורת היהודית. הדיון מתמקד בספר מורה נבוכים ובהשפעתו על ההגות היהודית לדורותיה. זהו עיון מעמיק בדמותו של הרמב״ם כפילוסוף ומחנך."
+                  }
+                }
               }
             }
           }

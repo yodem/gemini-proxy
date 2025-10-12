@@ -51,7 +51,7 @@ export const appConfig: AppConfig = {
   },
   gemini: {
     apiKey: getEnvVar('GOOGLE_API_KEY'),
-    model: getEnvVar('GEMINI_MODEL', 'gemini-1.5-pro'),
+    model: getEnvVar('GEMINI_MODEL', 'gemini-2.5-pro'),
   },
   app: {
     nodeEnv: getEnvVar('NODE_ENV', 'development'),

@@ -19,13 +19,18 @@ export namespace StaticDataAnalysisModel {
       description: "Array of category strings that will be used to match against the content. Must contain at least one category.",
       examples: [["פילוסופיה יהודית", "תורה", "חסידות", "קבלה", "מחשבה יהודית"]]
     }),
+    isYoutube: t.Optional(t.Boolean({
+      description: "If true, returns a YouTube-style description that starts with 'בסרטון זה פרופ׳ שלום צדיק מדבר על...'. If false or not provided, returns only categories.",
+      examples: [true, false],
+      default: false
+    })),
     clarificationParagraph: t.Optional(t.String({
       minLength: 1,
       description: "Optional additional paragraph to provide context and clarification for better category identification",
       examples: ["התוכן מתמקד בהשפעת הפילוסופיה האריסטוטלית על המחשבה היהודית בימי הביניים, במיוחד אצל הרמב״ם והרס״ג"]
     }))
   }, {
-    description: "Request body for static data analysis containing title, description, optional clarification and categories to match",
+    description: "Request body for static data analysis containing title, description, optional YouTube-style flag, optional clarification and categories to match",
     title: "StaticDataAnalysisRequest"
   });
 
@@ -41,9 +46,12 @@ export namespace StaticDataAnalysisModel {
       description: "Array of category names that best match the content"
     }), {
       description: "List of identified categories from the provided options"
-    })
+    }),
+    description: t.Optional(t.String({
+      description: "YouTube-style description starting with 'בסרטון זה פרופ׳ שלום צדיק מדבר על...'. Only present when isYoutube is true."
+    }))
   }, {
-    description: "Successful response containing identified categories",
+    description: "Successful response containing identified categories and optional YouTube-style description",
     title: "StaticDataAnalysisResponse"
   });
 
