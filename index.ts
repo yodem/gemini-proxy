@@ -3,6 +3,7 @@ import { openapi } from '@elysiajs/openapi';
 import { categoryIdentificationController } from './src/modules/categoryIdentification';
 import { youtubeVideoAnalysisController } from './src/modules/youtubeVideoAnalysis';
 import { staticDataAnalysisController } from './src/modules/staticDataAnalysis';
+import { politicalPhilosophyFlashcardsController } from './src/modules/politicalPhilosophyFlashcards';
 import { appConfig } from './src/config';
 
 // Create main Elysia server with method chaining
@@ -39,6 +40,10 @@ const app = new Elysia({
         {
           name: 'Static Data Analysis',
           description: 'AI-powered analysis of static data (title and description) using Gemini AI with Hebrew language support'
+        },
+        {
+          name: 'Political Philosophy Flashcards',
+          description: 'יצירת כרטיסי זיכרון (Anki) מטקסטים בפילוסופיה פוליטית באמצעות Gemini AI'
         }
       ]
     },
@@ -51,6 +56,8 @@ const app = new Elysia({
   .use(youtubeVideoAnalysisController)
   // Use the static data analysis controller module
   .use(staticDataAnalysisController)
+  // Use the political philosophy flashcards controller module
+  .use(politicalPhilosophyFlashcardsController)
   // Start the server using configuration
   .listen({
     port: appConfig.server.port,
