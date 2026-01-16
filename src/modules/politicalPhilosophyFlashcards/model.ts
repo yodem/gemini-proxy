@@ -39,6 +39,10 @@ export namespace PoliticalPhilosophyFlashcardsModel {
     ], {
       default: 'he',
       description: "שפת הפלט - עברית (he) או אנגלית (en)"
+    })),
+    extraCards: t.Optional(t.Boolean({
+      default: false,
+      description: "אם true, הניתוח יהיה מעמיק יותר ויצור כרטיסים נוספים עבור היבטים משניים, הקשרים נוספים וניואנסים בפסקה"
     }))
   }, {
     description: "בקשה ליצירת כרטיסי זיכרון מפסקה בפילוסופיה פוליטית",

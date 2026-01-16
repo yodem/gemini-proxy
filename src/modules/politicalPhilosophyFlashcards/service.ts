@@ -24,6 +24,7 @@ interface GenerateFlashcardsInput {
   work: string;
   chapter?: string;
   language?: 'he' | 'en';
+  extraCards?: boolean;
 }
 
 // Class for political philosophy flashcard generation business logic
@@ -34,18 +35,19 @@ export class PoliticalPhilosophyFlashcardsService {
   static async generateFlashcards(
     input: GenerateFlashcardsInput
   ): Promise<{ flashcards: Flashcard[]; metadata: { thinker: string; work: string; chapter?: string; totalCards: number } }> {
-    const { paragraph, thinker, work, chapter, language = 'he' } = input;
+    const { paragraph, thinker, work, chapter, language = 'he', extraCards = false } = input;
 
     console.log('📚 [Service] Starting flashcard generation');
     console.log('👤 [Service] Thinker:', thinker);
     console.log('📖 [Service] Work:', work);
     console.log('📄 [Service] Chapter:', chapter || 'Not specified');
     console.log('🌐 [Service] Language:', language);
+    console.log('➕ [Service] Extra Cards Mode:', extraCards);
     console.log('📝 [Service] Paragraph length:', paragraph.length, 'characters');
 
     try {
       console.log('📝 [Service] Building prompt for Gemini...');
-      const prompt = this.buildFlashcardPrompt(paragraph, thinker, work, chapter, language);
+      const prompt = this.buildFlashcardPrompt(paragraph, thinker, work, chapter, language, extraCards);
       console.log('✅ [Service] Prompt built successfully (length:', prompt.length, 'characters)');
 
       console.log('🚀 [Service] Calling Gemini API...');
@@ -97,9 +99,56 @@ export class PoliticalPhilosophyFlashcardsService {
     thinker: string,
     work: string,
     chapter?: string,
-    language: 'he' | 'en' = 'he'
+    language: 'he' | 'en' = 'he',
+    extraCards: boolean = false
   ): string {
     const chapterInfo = chapter ? `פרק: ${chapter}\n` : '';
+    
+    // Different instructions based on extraCards mode
+    const cardCountInstructions = extraCards ? `
+⚠️ חשוב מאוד - מצב ניתוח מעמיק (Extra Cards Mode):
+- נדרש ניתוח מעמיק ויסודי של הפסקה
+- צור כרטיסים עבור כל היבט, ניואנס והקשר בפסקה
+- חפש רעיונות משניים, השלכות, דוגמאות והבחנות עדינות
+- פסקה טיפוסית תייצר 3-6 כרטיסים במצב זה
+- אל תחשוש ליצור כרטיסים רבים - זה המצב שבו אנחנו רוצים כיסוי מקיף
+- כל פרט פילוסופי משמעותי ראוי לכרטיס נפרד
+- היבטים שכדאי לחפש:
+  * מושגים ראשיים ומשניים
+  * טיעונים והנמקות
+  * דוגמאות ואנלוגיות
+  * הבחנות והשוואות
+  * הקשרים היסטוריים ופילוסופיים
+  * השלכות ומסקנות
+  * ניואנסים מושגיים
+` : `
+⚠️ חשוב מאוד - כמות כרטיסים:
+- בדרך כלל, פסקה מכילה 1-2 רעיונות מרכזיים
+- צור כרטיס אחד אם הפסקה מתמקדת ברעיון בודד
+- צור 2 כרטיסים אם הפסקה מכילה שני רעיונות נפרדים או היבטים שונים של אותו נושא
+- אל תכפה יצירת כרטיסים מרובים אם הפסקה באמת עוסקת ברעיון אחד
+`;
+
+    const additionalGuidelines = extraCards ? `
+הנחיות נוספות (מצב מעמיק):
+- חפש כל פרט פילוסופי משמעותי ויצור עבורו כרטיס
+- פסקה עשירה יכולה לייצר 4-6 כרטיסים או יותר
+- כלול כרטיסים על הקשרים, דוגמאות והשלכות
+- ודא שכל כרטיס עומד בפני עצמו ומובן ללא הפסקה המקורית
+- השתמש במונחים המקוריים של ההוגה כשרלוונטי
+- אל תכלול כל הסבר נוסף או טקסט מחוץ לפורמט JSON
+- אל תוסיף סימני קוד (\`\`\`) או כל עיצוב markdown אחר
+- החזר JSON נקי לחלוטין
+` : `
+הנחיות נוספות:
+- צור כרטיס אחד אם הפסקה מתמקדת ברעיון מרכזי אחד
+- צור 2 כרטיסים אם הפסקה מכילה שני רעיונות נפרדים או שני היבטים משמעותיים
+- ודא שכל כרטיס עומד בפני עצמו ומובן ללא הפסקה המקורית
+- השתמש במונחים המקוריים של ההוגה כשרלוונטי
+- אל תכלול כל הסבר נוסף או טקסט מחוץ לפורמט JSON
+- אל תוסיף סימני קוד (\`\`\`) או כל עיצוב markdown אחר
+- החזר JSON נקי לחלוטין
+`;
     
     return `אתה מומחה לפילוסופיה פוליטית ומומחה למתודולוגיית הלמידה Anki. תפקידך לנתח פסקאות מתוך טקסטים אקדמיים וליצור מהם כרטיסי זיכרון (Flashcards) איכותיים.
 
@@ -109,14 +158,7 @@ export class PoliticalPhilosophyFlashcardsService {
 ${chapterInfo}
 הפסקה לניתוח:
 ${paragraph}
-
-⚠️ חשוב מאוד - כמות כרטיסים:
-- בדרך כלל, פסקה מכילה 1-2 רעיונות מרכזיים
-- צור כרטיס אחד אם הפסקה מתמקדת ברעיון בודד
-- צור 2 כרטיסים אם הפסקה מכילה שני רעיונות נפרדים או היבטים שונים של אותו נושא
-- אל תכפה יצירת כרטיסים מרובים אם הפסקה באמת עוסקת ברעיון אחד
-- כל רעיון מהותי ונפרד בפסקה צריך כרטיס משלו
-
+${cardCountInstructions}
 חוקי עבודה:
 1. אטומיות: כל כרטיס יעסוק ברעיון אחד בלבד.
 2. ניסוח אקטיבי: השתמש בשאלות 'למה', 'איך' ו'מה ההבדל', ולא רק ב'מי'.
@@ -161,14 +203,7 @@ ${paragraph}
   "tags": ["Argument", "הובס", "לויתן", "מצב הטבע", "מלחמת הכל בכל"]
 }
 
-הנחיות נוספות:
-- צור כרטיס אחד אם הפסקה מתמקדת ברעיון מרכזי אחד
-- צור 2 כרטיסים אם הפסקה מכילה שני רעיונות נפרדים או שני היבטים משמעותיים
-- ודא שכל כרטיס עומד בפני עצמו ומובן ללא הפסקה המקורית
-- השתמש במונחים המקוריים של ההוגה כשרלוונטי
-- אל תכלול כל הסבר נוסף או טקסט מחוץ לפורמט JSON
-- אל תוסיף סימני קוד (\`\`\`) או כל עיצוב markdown אחר
-- החזר JSON נקי לחלוטין`;
+${additionalGuidelines}`;
   }
 
   /**

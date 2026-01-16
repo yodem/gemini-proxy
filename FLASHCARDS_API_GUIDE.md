@@ -28,6 +28,7 @@ interface GenerateFlashcardsRequest {
   work: string;           // Name of the work/book
   chapter?: string;       // Optional: specific chapter
   language?: 'he' | 'en'; // Optional: output language (default: 'he')
+  extraCards?: boolean;   // Optional: deep analysis mode for more cards (default: false)
 }
 ```
 
@@ -53,6 +54,17 @@ interface GenerateFlashcardsRequest {
 - **`language`** (optional, 'he' | 'en', default: 'he')
   - Output language for flashcards
   - Currently optimized for Hebrew (`'he'`)
+
+- **`extraCards`** (optional, boolean, default: false)
+  - When `true`, activates **deep analysis mode**
+  - AI performs comprehensive analysis and creates additional cards for:
+    - Secondary concepts and nuances
+    - Examples and analogies
+    - Historical and philosophical contexts
+    - Implications and conclusions
+    - Fine distinctions and comparisons
+  - Typical output: **3-6 cards** in this mode (vs. 1-2 in normal mode)
+  - Use when you want thorough coverage of a rich philosophical paragraph
 
 ---
 
@@ -100,6 +112,82 @@ interface ErrorResponse {
 
 ---
 
+## Two Analysis Modes
+
+### Normal Mode (`extraCards: false` - default)
+
+**Best for:** Standard learning, most paragraphs
+
+**Characteristics:**
+- Focuses on main ideas only
+- Typically generates **1-2 cards**
+- Creates one card per distinct core concept
+- Efficient for routine study material
+
+**Example output:**
+```json
+{
+  "success": true,
+  "flashcards": [
+    {
+      "type": "Concept",
+      "front": "מהו מושג השוויון של הובס במצב הטבע?",
+      "back": "...",
+      "context_logic": "...",
+      "tags": ["Concept", "הובס", "לויתן"]
+    }
+  ]
+}
+```
+
+### Deep Analysis Mode (`extraCards: true`)
+
+**Best for:** Complex paragraphs, exam preparation, comprehensive study
+
+**Characteristics:**
+- In-depth analysis of all aspects
+- Typically generates **3-6 cards**
+- Covers main ideas, secondary concepts, examples, contexts, implications, nuances
+- Thorough coverage for critical passages
+
+**Example output:**
+```json
+{
+  "success": true,
+  "flashcards": [
+    {
+      "type": "Concept",
+      "front": "מהו מושג השוויון של הובס במצב הטבע?",
+      ...
+    },
+    {
+      "type": "Argument",
+      "front": "מדוע לפי הובס כוח פיזי לא מבטיח עליונות?",
+      ...
+    },
+    {
+      "type": "Context",
+      "front": "מה הקשר בין שוויון במצב הטבע לרעיון הזכות לטבע?",
+      ...
+    },
+    {
+      "type": "Contrast",
+      "front": "מה ההבדל בין תפיסת השוויון של הובס לבין המסורת הקלאסית?",
+      ...
+    }
+  ]
+}
+```
+
+**When to use Extra Cards mode:**
+- Dense philosophical paragraphs with multiple layers
+- Key foundational texts (e.g., Hobbes' state of nature, Locke's property theory)
+- Exam preparation where deep understanding is required
+- Complex arguments with multiple premises
+- Paragraphs introducing core concepts in a thinker's philosophy
+
+---
+
 ## Complete Example
 
 ### Request
@@ -112,7 +200,8 @@ curl -X POST http://localhost:4000/generateFlashcards/ \
     "thinker": "הובס",
     "work": "לויתן",
     "chapter": "פרק יג",
-    "language": "he"
+    "language": "he",
+    "extraCards": false
   }'
 ```
 
@@ -165,7 +254,8 @@ async function generateFlashcards(
   thinker: string,
   work: string,
   chapter?: string,
-  language: 'he' | 'en' = 'he'
+  language: 'he' | 'en' = 'he',
+  extraCards: boolean = false
 ) {
   const response = await fetch('http://localhost:4000/generateFlashcards/', {
     method: 'POST',
@@ -177,7 +267,8 @@ async function generateFlashcards(
       thinker,
       work,
       chapter,
-      language
+      language,
+      extraCards
     })
   });
 
@@ -195,13 +286,31 @@ try {
     "במצב הטבעי, לפי הובס...",
     "הובס",
     "לויתן",
-    "פרק יג"
+    "פרק יג",
+    "he",
+    false  // Normal mode: 1-2 cards
   );
   
   console.log(`Generated ${result.metadata.totalCards} flashcards`);
   result.flashcards.forEach(card => {
     console.log(`[${card.type}] ${card.front}`);
   });
+} catch (error) {
+  console.error('Error:', error.message);
+}
+
+// Deep analysis mode
+try {
+  const result = await generateFlashcards(
+    "במצב הטבעי, לפי הובס...",
+    "הובס",
+    "לויתן",
+    "פרק יג",
+    "he",
+    true  // Extra cards mode: 3-6 cards
+  );
+  
+  console.log(`Generated ${result.metadata.totalCards} flashcards (deep mode)`);
 } catch (error) {
   console.error('Error:', error.message);
 }
@@ -218,6 +327,7 @@ async function generateFlashcards(request: {
   work: string;
   chapter?: string;
   language?: 'he' | 'en';
+  extraCards?: boolean;
 }) {
   try {
     const response = await axios.post(
@@ -261,6 +371,11 @@ async function generateFlashcards(request: {
    - Optional, must be either `'he'` or `'en'`
    - Defaults to `'he'` if not provided
 
+6. **`extraCards`**:
+   - Optional boolean
+   - Defaults to `false` if not provided
+   - When `true`, activates deep analysis mode for comprehensive coverage
+
 ### Error Messages (Hebrew)
 
 - `"הפסקה לניתוח היא שדה חובה ולא יכולה להיות ריקה"` - Paragraph is required
@@ -293,11 +408,14 @@ The AI follows these principles when generating flashcards:
 ## Notes for Integration
 
 1. **Language**: The system is optimized for Hebrew (`he`) but supports English (`en`)
-2. **Response Time**: Expect 3-10 seconds depending on paragraph length and complexity
-3. **Card Count**: Typically **1 card per paragraph**, but **2 cards** when the paragraph contains two distinct ideas. The AI doesn't force multiple cards - it creates one card per distinct idea
+2. **Response Time**: Expect 3-10 seconds depending on paragraph length and complexity (longer with `extraCards: true`)
+3. **Card Count**: 
+   - **Normal mode** (`extraCards: false`): Typically **1 card**, sometimes **2 cards** when paragraph contains two distinct ideas
+   - **Deep analysis mode** (`extraCards: true`): Typically **3-6 cards** with comprehensive coverage of all aspects
 4. **Response Structure**: Always returns an array of flashcards in the `flashcards` field, even if only one card is generated
 5. **Tags**: Each card automatically includes: card type, thinker name, work name, chapter (if provided), and key concepts
 6. **Error Handling**: Always check the `success` field in the response before processing flashcards
+7. **Extra Cards Mode**: Use sparingly for particularly rich/complex paragraphs where deep understanding is critical
 
 ---
 

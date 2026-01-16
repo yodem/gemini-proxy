@@ -8,13 +8,14 @@ export const politicalPhilosophyFlashcardsController = new Elysia({
   name: 'PoliticalPhilosophyFlashcards.Controller'
 })
   .post('/', async ({ body, set }) => {
-    const { paragraph, thinker, work, chapter, language } = body;
+    const { paragraph, thinker, work, chapter, language, extraCards } = body;
 
     console.log('📚 [Flashcards] API call received');
     console.log('📥 [Flashcards] Input - Thinker:', thinker);
     console.log('📥 [Flashcards] Input - Work:', work);
     console.log('📥 [Flashcards] Input - Chapter:', chapter || 'Not specified');
     console.log('📥 [Flashcards] Input - Language:', language || 'he');
+    console.log('📥 [Flashcards] Input - Extra Cards:', extraCards || false);
     console.log('📥 [Flashcards] Input - Paragraph length:', paragraph.length, 'characters');
 
     try {
@@ -25,7 +26,8 @@ export const politicalPhilosophyFlashcardsController = new Elysia({
         thinker,
         work,
         chapter,
-        language
+        language,
+        extraCards
       });
       console.log('✅ [Flashcards] Input validation passed');
 
@@ -36,7 +38,8 @@ export const politicalPhilosophyFlashcardsController = new Elysia({
         thinker,
         work,
         chapter,
-        language
+        language,
+        extraCards
       });
 
       console.log('✅ [Flashcards] Gemini generation completed successfully');
