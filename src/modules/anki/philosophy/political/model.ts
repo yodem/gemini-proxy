@@ -123,4 +123,3 @@ export namespace PoliticalPhilosophyFlashcardsModel {
 
   export type ErrorResponse = typeof errorResponse.static;
 }
-

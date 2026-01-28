@@ -2,24 +2,29 @@ import { Elysia } from 'elysia';
 import { PoliticalPhilosophyFlashcardsService } from './service';
 import { PoliticalPhilosophyFlashcardsModel } from './model';
 
-// Create Elysia controller for political philosophy flashcards
+/**
+ * Political Philosophy Flashcards Controller
+ *
+ * Endpoint for generating flashcards from political philosophy texts.
+ * Route: /anki/philosophy/political
+ */
 export const politicalPhilosophyFlashcardsController = new Elysia({
-  prefix: '/generateFlashcards',
+  prefix: '',
   name: 'PoliticalPhilosophyFlashcards.Controller'
 })
   .post('/', async ({ body, set }) => {
     const { paragraph, thinker, work, chapter, language, extraCards } = body;
 
-    console.log('📚 [Flashcards] API call received');
-    console.log('📥 [Flashcards] Input - Thinker:', thinker);
-    console.log('📥 [Flashcards] Input - Work:', work);
-    console.log('📥 [Flashcards] Input - Chapter:', chapter || 'Not specified');
-    console.log('📥 [Flashcards] Input - Language:', language || 'he');
-    console.log('📥 [Flashcards] Input - Extra Cards:', extraCards || false);
-    console.log('📥 [Flashcards] Input - Paragraph length:', paragraph.length, 'characters');
+    console.log('📚 [PoliticalPhilosophyFlashcards] API call received');
+    console.log('📥 [PoliticalPhilosophyFlashcards] Input - Thinker:', thinker);
+    console.log('📥 [PoliticalPhilosophyFlashcards] Input - Work:', work);
+    console.log('📥 [PoliticalPhilosophyFlashcards] Input - Chapter:', chapter || 'Not specified');
+    console.log('📥 [PoliticalPhilosophyFlashcards] Input - Language:', language || 'he');
+    console.log('📥 [PoliticalPhilosophyFlashcards] Input - Extra Cards:', extraCards || false);
+    console.log('📥 [PoliticalPhilosophyFlashcards] Input - Paragraph length:', paragraph.length, 'characters');
 
     try {
-      console.log('✅ [Flashcards] Starting input validation...');
+      console.log('✅ [PoliticalPhilosophyFlashcards] Starting input validation...');
       // Validate input using service
       PoliticalPhilosophyFlashcardsService.validateInput({
         paragraph,
@@ -29,9 +34,9 @@ export const politicalPhilosophyFlashcardsController = new Elysia({
         language,
         extraCards
       });
-      console.log('✅ [Flashcards] Input validation passed');
+      console.log('✅ [PoliticalPhilosophyFlashcards] Input validation passed');
 
-      console.log('🤖 [Flashcards] Starting Gemini AI flashcard generation...');
+      console.log('🤖 [PoliticalPhilosophyFlashcards] Starting Gemini AI flashcard generation...');
       // Use service to generate flashcards
       const result = await PoliticalPhilosophyFlashcardsService.generateFlashcards({
         paragraph,
@@ -42,8 +47,8 @@ export const politicalPhilosophyFlashcardsController = new Elysia({
         extraCards
       });
 
-      console.log('✅ [Flashcards] Gemini generation completed successfully');
-      console.log('📤 [Flashcards] Response - Total cards:', result.flashcards.length);
+      console.log('✅ [PoliticalPhilosophyFlashcards] Gemini generation completed successfully');
+      console.log('📤 [PoliticalPhilosophyFlashcards] Response - Total cards:', result.flashcards.length);
 
       const response = {
         success: true,
@@ -51,13 +56,13 @@ export const politicalPhilosophyFlashcardsController = new Elysia({
         metadata: result.metadata
       };
 
-      console.log('🎉 [Flashcards] API call completed successfully');
+      console.log('🎉 [PoliticalPhilosophyFlashcards] API call completed successfully');
       return response;
 
     } catch (error) {
-      console.error('❌ [Flashcards] Error occurred:', error);
-      console.error('❌ [Flashcards] Error type:', error instanceof Error ? error.constructor.name : typeof error);
-      console.error('❌ [Flashcards] Error message:', error instanceof Error ? error.message : String(error));
+      console.error('❌ [PoliticalPhilosophyFlashcards] Error occurred:', error);
+      console.error('❌ [PoliticalPhilosophyFlashcards] Error type:', error instanceof Error ? error.constructor.name : typeof error);
+      console.error('❌ [PoliticalPhilosophyFlashcards] Error message:', error instanceof Error ? error.message : String(error));
 
       // Set appropriate status code for error
       const isValidationError = error instanceof Error && (
@@ -67,7 +72,7 @@ export const politicalPhilosophyFlashcardsController = new Elysia({
       );
 
       set.status = isValidationError ? 400 : 500;
-      console.log('📊 [Flashcards] HTTP status set to:', set.status);
+      console.log('📊 [PoliticalPhilosophyFlashcards] HTTP status set to:', set.status);
 
       const errorResponse = {
         success: false,
@@ -75,7 +80,7 @@ export const politicalPhilosophyFlashcardsController = new Elysia({
         message: error instanceof Error ? error.message : 'שגיאה לא ידועה'
       };
 
-      console.log('📤 [Flashcards] Error response:', errorResponse);
+      console.log('📤 [PoliticalPhilosophyFlashcards] Error response:', errorResponse);
       return errorResponse;
     }
   }, {
@@ -88,22 +93,22 @@ export const politicalPhilosophyFlashcardsController = new Elysia({
     detail: {
       summary: 'יצירת כרטיסי זיכרון (Flashcards) מפסקה בפילוסופיה פוליטית',
       description: `
-        מנתח פסקה מתוך טקסט אקדמי בפילוסופיה פוליטית ויוצר ממנה כרטיסי זיכרון (Flashcards) איכותיים בסגנון Anki.
-        משתמש ב-Google Gemini AI לניתוח סמנטי חכם של הטקסט.
-        
-        **סוגי כרטיסים:**
-        - Concept: מושג מרכזי או הגדרה
-        - Argument: טיעון או הנמקה
-        - Context: הקשר היסטורי או פילוסופי
-        - Contrast: השוואה או ניגוד בין רעיונות
-        
-        **עקרונות:**
-        - אטומיות: כל כרטיס עוסק ברעיון אחד בלבד
-        - ניסוח אקטיבי: שאלות 'למה', 'איך', 'מה ההבדל'
-        - דיוק אקדמי: שמירה על המשמעות המקורית
-        - הקשר: כל תשובה כוללת את הרציונל של ההוגה
+מנתח פסקה מתוך טקסט אקדמי בפילוסופיה פוליטית ויוצר ממנה כרטיסי זיכרון (Flashcards) איכותיים בסגנון Anki.
+משתמש ב-Google Gemini AI לניתוח סמנטי חכם של הטקסט.
+
+**סוגי כרטיסים:**
+- Concept: מושג מרכזי או הגדרה
+- Argument: טיעון או הנמקה
+- Context: הקשר היסטורי או פילוסופי
+- Contrast: השוואה או ניגוד בין רעיונות
+
+**עקרונות:**
+- אטומיות: כל כרטיס עוסק ברעיון אחד בלבד
+- ניסוח אקטיבי: שאלות 'למה', 'איך', 'מה ההבדל'
+- דיוק אקדמי: שמירה על המשמעות המקורית
+- הקשר: כל תשובה כוללת את הרציונל של ההוגה
       `,
-      tags: ['Political Philosophy Flashcards'],
+      tags: ['Anki - Philosophy'],
       responses: {
         200: {
           description: 'כרטיסי הזיכרון נוצרו בהצלחה',
@@ -157,4 +162,3 @@ export const politicalPhilosophyFlashcardsController = new Elysia({
       }
     }
   });
-

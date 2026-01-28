@@ -3,7 +3,8 @@ import { openapi } from '@elysiajs/openapi';
 import { categoryIdentificationController } from './src/modules/categoryIdentification';
 import { youtubeVideoAnalysisController } from './src/modules/youtubeVideoAnalysis';
 import { staticDataAnalysisController } from './src/modules/staticDataAnalysis';
-import { politicalPhilosophyFlashcardsController } from './src/modules/politicalPhilosophyFlashcards';
+import { flashcardsModule } from './src/modules/flashcards';
+import { ankiModule } from './src/modules/anki';
 import { appConfig } from './src/config';
 
 // Create main Elysia server with method chaining
@@ -42,8 +43,12 @@ const app = new Elysia({
           description: 'AI-powered analysis of static data (title and description) using Gemini AI with Hebrew language support'
         },
         {
-          name: 'Political Philosophy Flashcards',
-          description: 'יצירת כרטיסי זיכרון (Anki) מטקסטים בפילוסופיה פוליטית באמצעות Gemini AI'
+          name: 'Anki - Philosophy',
+          description: 'Anki-style flashcard generation for philosophy texts. Includes political philosophy, Kant, and other philosophical domains with multi-turn conversation support and conversation history management.'
+        },
+        {
+          name: 'Flashcards',
+          description: 'Generic AI-powered flashcard generation from any content with user-defined system instructions'
         }
       ]
     },
@@ -56,8 +61,10 @@ const app = new Elysia({
   .use(youtubeVideoAnalysisController)
   // Use the static data analysis controller module
   .use(staticDataAnalysisController)
-  // Use the political philosophy flashcards controller module
-  .use(politicalPhilosophyFlashcardsController)
+  // Use the Anki flashcards module (philosophy)
+  .use(ankiModule)
+  // Use the generic flashcards module
+  .use(flashcardsModule)
   // Start the server using configuration
   .listen({
     port: appConfig.server.port,
