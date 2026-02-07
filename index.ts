@@ -47,6 +47,10 @@ const app = new Elysia({
           description: 'Anki-style flashcard generation for philosophy texts. Includes political philosophy, Kant, and other philosophical domains with multi-turn conversation support and conversation history management.'
         },
         {
+          name: 'Anki - Bible',
+          description: 'Anki-style flashcard generation for תנ״ך (Bible) texts in an academic perspective. Supports verse-aware deep analysis mode with multi-turn conversation support.'
+        },
+        {
           name: 'Flashcards',
           description: 'Generic AI-powered flashcard generation from any content with user-defined system instructions'
         }
